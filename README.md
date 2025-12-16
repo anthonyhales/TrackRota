@@ -22,7 +22,7 @@ This is **ALPHA Release 1** of an internal on-call rota manager.
    Then restart the container.
 
 3. Open:
-   - http://localhost:8000
+   - http://localhost:8555
 
 ## Add SB Admin assets (local)
 Download the SB Admin template zip from Start Bootstrap, then copy the following folders into:
