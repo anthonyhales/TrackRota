@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h1 class="h3 text-gray-800 mb-0">Staff</h1>
+  <a class="btn btn-primary btn-sm" href="/staff/new"><i class="fas fa-plus"></i> Add staff</a>
+</div>
+
+<div class="card shadow">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-bordered table-sm">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Team</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in staff %}
+          <tr>
+            <td>{{ s.full_name }}</td>
+            <td>{{ s.team or "" }}</td>
+            <td>{{ s.email or "" }}</td>
+            <td>{{ s.phone or "" }}</td>
+            <td>
+              {% if s.active %}
+                <span class="badge badge-success">Active</span>
+              {% else %}
+                <span class="badge badge-secondary">Inactive</span>
+              {% endif %}
+            </td>
+            <td><a class="btn btn-sm btn-outline-primary" href="/staff/{{ s.id }}">Edit</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

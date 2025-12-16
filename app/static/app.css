@@ -1,0 +1,3 @@
+/* ALPHA v1 tweaks */
+.rota-table td { vertical-align: top; min-width: 190px; }
+.rota-cell-form select { width: 100%; }

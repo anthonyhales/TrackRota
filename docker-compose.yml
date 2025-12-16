@@ -1,0 +1,19 @@
+services:
+  oncall-rota:
+    build: .
+    container_name: oncall-rota-alpha1
+    ports:
+      - "8000:8000"
+    environment:
+      # Set these on first run to create the initial admin user automatically:
+      # APP_BOOTSTRAP_ADMIN_EMAIL=admin@example.com
+      # APP_BOOTSTRAP_ADMIN_PASSWORD=ChangeMeNow!
+      - APP_DB_PATH=/data/app.db
+      - APP_TIMEZONE=Europe/London
+      - APP_SESSION_SECRET=change-this-to-a-long-random-string
+    volumes:
+      - oncall_rota_data:/data
+    restart: unless-stopped
+
+volumes:
+  oncall_rota_data:

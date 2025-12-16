@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1 class="h3 mb-3 text-gray-800">Settings</h1>
+
+{% if request.query_params.get('note') %}
+  <div class="alert alert-warning">{{ request.query_params.get('note') }}</div>
+{% endif %}
+
+<div class="card shadow">
+  <div class="card-body">
+    <p class="text-muted mb-3">
+      In ALPHA v1, settings are environment-based (configured in Docker). In a later release we will store these in the database.
+    </p>
+    <form method="post" action="/settings">
+      <div class="form-group">
+        <label>Organisation name</label>
+        <input class="form-control" name="org_name" value="{{ org_name }}">
+      </div>
+      <div class="form-group">
+        <label>Timezone</label>
+        <input class="form-control" name="timezone" value="{{ tz }}">
+        <small class="form-text text-muted">Example: Europe/London</small>
+      </div>
+      <button class="btn btn-primary" type="submit" disabled>Save (disabled in ALPHA v1)</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

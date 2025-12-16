@@ -1,0 +1,70 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1 class="h3 mb-3 text-gray-800">Shift Types</h1>
+
+<div class="row">
+  <div class="col-lg-5 mb-4">
+    <div class="card shadow">
+      <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Add shift type</h6>
+      </div>
+      <div class="card-body">
+        <form method="post" action="/shift-types/new">
+          <div class="form-group">
+            <label>Name</label>
+            <input class="form-control" name="name" required placeholder="Primary">
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <input class="form-control" name="description" placeholder="Optional">
+          </div>
+          <div class="form-group form-check">
+            <input type="checkbox" class="form-check-input" id="activeNew" name="active" checked>
+            <label class="form-check-label" for="activeNew">Active</label>
+          </div>
+          <button class="btn btn-primary" type="submit">Add</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-7 mb-4">
+    <div class="card shadow">
+      <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Existing</h6>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-sm table-bordered">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Active</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for st in items %}
+              <tr>
+                <form method="post" action="/shift-types/{{ st.id }}">
+                  <td><input class="form-control form-control-sm" name="name" value="{{ st.name }}"></td>
+                  <td><input class="form-control form-control-sm" name="description" value="{{ st.description or '' }}"></td>
+                  <td class="text-center">
+                    <input type="checkbox" name="active" {% if st.active %}checked{% endif %}>
+                  </td>
+                  <td class="text-center">
+                    <button class="btn btn-sm btn-outline-primary" type="submit">Save</button>
+                  </td>
+                </form>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

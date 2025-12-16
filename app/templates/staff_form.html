@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1 class="h3 mb-3 text-gray-800">{{ "Edit staff" if staff_member else "Add staff" }}</h1>
+
+<div class="card shadow">
+  <div class="card-body">
+    <form method="post" action="{{ '/staff/' ~ staff_member.id if staff_member else '/staff/new' }}">
+      <div class="form-group">
+        <label>Full name</label>
+        <input class="form-control" name="full_name" required value="{{ staff_member.full_name if staff_member else '' }}">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group col-md-6">
+          <label>Email</label>
+          <input class="form-control" name="email" type="email" value="{{ staff_member.email if staff_member else '' }}">
+        </div>
+        <div class="form-group col-md-6">
+          <label>Phone</label>
+          <input class="form-control" name="phone" value="{{ staff_member.phone if staff_member else '' }}">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Team</label>
+        <input class="form-control" name="team" value="{{ staff_member.team if staff_member else '' }}">
+      </div>
+
+      <div class="form-group form-check">
+        {% if staff_member and not staff_member.active %}
+          <input type="checkbox" class="form-check-input" id="activeCheck" name="active">
+        {% else %}
+          <input type="checkbox" class="form-check-input" id="activeCheck" name="active" checked>
+        {% endif %}
+        <label class="form-check-label" for="activeCheck">Active</label>
+      </div>
+
+      <button class="btn btn-primary" type="submit">Save</button>
+      <a class="btn btn-secondary" href="/staff">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

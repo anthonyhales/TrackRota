@@ -1,0 +1,101 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1 class="h3 mb-3 text-gray-800">Users</h1>
+
+<div class="row">
+  <div class="col-lg-5 mb-4">
+    <div class="card shadow">
+      <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Create user</h6>
+      </div>
+      <div class="card-body">
+        <form method="post" action="/users/new">
+          <div class="form-group">
+            <label>Email</label>
+            <input class="form-control" name="email" type="email" required>
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input class="form-control" name="password" type="password" required>
+          </div>
+          <div class="form-group">
+            <label>Role</label>
+            <select class="form-control" name="role">
+              <option>Staff</option>
+              <option>Manager</option>
+              <option>Admin</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Link to staff (optional)</label>
+            <select class="form-control" name="staff_id">
+              <option value="">-- none --</option>
+              {% for s in staff %}
+                <option value="{{ s.id }}">{{ s.full_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button class="btn btn-primary" type="submit">Create</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-7 mb-4">
+    <div class="card shadow">
+      <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Existing users</h6>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-sm table-bordered">
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Staff link</th>
+                <th>Active</th>
+                <th>New password</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for u in users %}
+              <tr>
+                <form method="post" action="/users/{{ u.id }}">
+                  <td><input class="form-control form-control-sm" name="email" value="{{ u.email }}"></td>
+                  <td>
+                    <select class="form-control form-control-sm" name="role">
+                      <option {% if u.role=='Staff' %}selected{% endif %}>Staff</option>
+                      <option {% if u.role=='Manager' %}selected{% endif %}>Manager</option>
+                      <option {% if u.role=='Admin' %}selected{% endif %}>Admin</option>
+                    </select>
+                  </td>
+                  <td>
+                    <select class="form-control form-control-sm" name="staff_id">
+                      <option value="">-- none --</option>
+                      {% for s in staff %}
+                        <option value="{{ s.id }}" {% if u.staff_id==s.id %}selected{% endif %}>{{ s.full_name }}</option>
+                      {% endfor %}
+                    </select>
+                  </td>
+                  <td class="text-center">
+                    <input type="checkbox" name="active" {% if u.active %}checked{% endif %}>
+                  </td>
+                  <td>
+                    <input class="form-control form-control-sm" name="new_password" placeholder="leave blank">
+                  </td>
+                  <td class="text-center">
+                    <button class="btn btn-sm btn-outline-primary" type="submit">Save</button>
+                  </td>
+                </form>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
