@@ -5,12 +5,10 @@ services:
     ports:
       - "8555:8555"
     environment:
-      # Set these on first run to create the initial admin user automatically:
-      APP_BOOTSTRAP_ADMIN_EMAIL=admin@example.com
-      APP_BOOTSTRAP_ADMIN_PASSWORD=password
-      APP_DB_PATH=/data/app.db
-      APP_TIMEZONE=Europe/London
-      APP_SESSION_SECRET=4]FdY;yeFWhU;P%jMSqJ?w|_!<fyAm
+      APP_BOOTSTRAP_ADMIN_EMAIL: admin@example.com
+      APP_BOOTSTRAP_ADMIN_PASSWORD: ChangeMeNow!
+      APP_SESSION_SECRET: 4]FdY;yeFWhU;P%jMSqJ?w|_!<fyAm
+      APP_TIMEZONE: Europe/London
     volumes:
       - oncall_rota_data:/data
     restart: unless-stopped
