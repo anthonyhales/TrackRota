@@ -24,18 +24,6 @@ This is **ALPHA Release 1** of an internal on-call rota manager.
 3. Open:
    - http://localhost:8555
 
-## Add SB Admin assets (local)
-Download the SB Admin template zip from Start Bootstrap, then copy the following folders into:
-
-`app/static/sb-admin/`
-
-You should end up with something like:
-- `app/static/sb-admin/css/`
-- `app/static/sb-admin/js/`
-- `app/static/sb-admin/vendor/`
-
-If those folders are missing, the app will still run, but styling will look plain.
-
 ## Default roles
 - **Admin**: full access
 - **Manager**: manage staff and rotas
