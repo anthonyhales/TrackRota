@@ -3,7 +3,7 @@ services:
     build: .
     container_name: oncall-rota-alpha1
     ports:
-      - "8000:8000"
+      - "8555:8555"
     environment:
       # Set these on first run to create the initial admin user automatically:
       # APP_BOOTSTRAP_ADMIN_EMAIL=admin@example.com
