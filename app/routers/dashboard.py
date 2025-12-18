@@ -7,7 +7,7 @@ from ..db import SessionLocal
 from ..auth import get_current_user
 from ..models import Rota, ShiftType, RotaEntry, Staff
 from ..utils import now_local
-from ..utils.rotas import is_favourite
+from ..utils import is_favourite
 
 router = APIRouter()
 
