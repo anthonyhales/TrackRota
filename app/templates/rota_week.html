@@ -10,6 +10,15 @@
   <div class="d-flex align-items-center">
 
     <!-- Rota selector -->
+    <form method="get" class="form-inline mb-2">
+  <select name="rota_id" class="form-control form-control-sm" onchange="this.form.submit()">
+    {% for r in rotas %}
+      <option value="{{ r.id }}" {% if r.id == rota_id %}selected{% endif %}>
+        {{ r.name }}
+      </option>
+    {% endfor %}
+  </select>
+</form>
     <form method="get" class="mr-2 mb-0">
       <input type="hidden" name="week" value="{{ week_start.isoformat() }}">
       <select name="rota_id"
