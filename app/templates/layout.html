@@ -28,11 +28,15 @@
 
     <hr class="sidebar-divider">
 
-    <div class="sidebar-heading">Rota</div>
+    <div class="sidebar-heading">Home</div>
 
     <li class="nav-item">
       <a class="nav-link" href="/rota"><i class="fas fa-table"></i><span>Rota</span></a>
     </li>
+
+    <hr class="sidebar-divider">
+
+    <div class="sidebar-heading">Management</div>
 
     {% if user and user.role in ["Admin", "Manager"] %}
     <li class="nav-item">
@@ -41,6 +45,12 @@
     <li class="nav-item">
       <a class="nav-link" href="/shift-types"><i class="fas fa-sliders-h"></i><span>Shift Types</span></a>
     </li>
+    <li class="nav-item">
+     <a class="nav-link" href="/rotas"><i class="fas fa-table"></i><span>Manage Rotas</span></a>
+    </li>
+    <li class="nav-item">
+     <a class="nav-link" href="/time-off"><i class="fas fa-plane-departure"></i><span>Time Off</span></a>
+    </li>
     {% endif %}
 
     <hr class="sidebar-divider">
@@ -48,12 +58,6 @@
     <div class="sidebar-heading">Admin</div>
 
     {% if user and user.role == "Admin" %}
-    <li class="nav-item">
-     <a class="nav-link" href="/rotas"><i class="fas fa-table"></i><span>Manage Rotas</span></a>
-    </li>
-    <li class="nav-item">
-     <a class="nav-link" href="/time-off"><i class="fas fa-plane-departure"></i><span>Time Off</span></a>
-    </li>
     <li class="nav-item">
       <a class="nav-link" href="/users"><i class="fas fa-user-shield"></i><span>Users</span></a>
     </li>
