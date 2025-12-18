@@ -86,6 +86,7 @@ def rota_week(request: Request, week: str | None = Query(default=None)):
                 "user": user,
                 "can_edit": can_edit,
                 "days": days,
+                "today": today,
                 "week_start": week_start,
                 "prev_week": prev_week,
                 "next_week": next_week,
@@ -94,6 +95,7 @@ def rota_week(request: Request, week: str | None = Query(default=None)):
                 "entry_map": entry_map,
                 "unavailable": unavailable,
                 "conflicts": conflicts,
+                
             },
         )
 
