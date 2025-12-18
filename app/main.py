@@ -18,7 +18,17 @@ from .routers.users import router as users_router
 from .routers.settings import router as settings_router
 from .routers.time_off import router as time_off_router
 from .version import APP_VERSION
+from .update_check import get_latest_release
 
+@app.on_event("startup")
+def check_for_updates():
+    release = get_latest_release()
+    if release:
+        app.state.latest_version = release
+        app.state.update_available = release["tag"] != APP_VERSION
+    else:
+        app.state.latest_version = None
+        app.state.update_available = False
 app = FastAPI(title="On Call Tracker - ALPHA 1")
 
 # Static
