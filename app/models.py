@@ -22,6 +22,8 @@ class Staff(Base):
     email: Mapped[str | None] = mapped_column(String(254), nullable=True, index=True)
     phone: Mapped[str | None] = mapped_column(String(50), nullable=True)
     team: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    extension: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    bleep: Mapped[str | None] = mapped_column(String(20), nullable=True)
     active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, nullable=False
