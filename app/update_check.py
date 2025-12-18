@@ -18,3 +18,6 @@ def get_latest_release():
         }
     except Exception:
         return None
+
+def normalize(v: str) -> tuple[int, ...]:
+    return tuple(int(x) for x in v.split("."))
