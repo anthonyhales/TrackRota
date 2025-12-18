@@ -20,11 +20,9 @@ def rota_week(request: Request, week: str | None = Query(default=None)):
         if not user:
             return RedirectResponse("/login", status_code=303)
 
-        # staff can view; managers/admin can edit
         can_edit = require_role(user, {"Admin", "Manager"})
 
         if week:
-            # expects YYYY-MM-DD
             try:
                 d = datetime.strptime(week, "%Y-%m-%d").date()
             except ValueError:
@@ -37,11 +35,47 @@ def rota_week(request: Request, week: str | None = Query(default=None)):
         prev_week = (week_start - timedelta(days=7)).isoformat()
         next_week = (week_start + timedelta(days=7)).isoformat()
 
-        shift_types = db.query(ShiftType).filter(ShiftType.active == True).order_by(ShiftType.name.asc()).all()
-        staff = db.query(Staff).filter(Staff.active == True).order_by(Staff.full_name.asc()).all()
+        shift_types = (
+            db.query(ShiftType)
+            .filter(ShiftType.active == True)
+            .order_by(ShiftType.name.asc())
+            .all()
+        )
+
+        staff = (
+            db.query(Staff)
+            .filter(Staff.active == True)
+            .order_by(Staff.full_name.asc())
+            .all()
+        )
 
         entries = db.query(RotaEntry).filter(RotaEntry.shift_date.in_(days)).all()
         entry_map = {(e.shift_date, e.shift_type_id): e for e in entries}
+
+        # ---- ALPHA 1.1: time off awareness ----
+
+        week_start_day = days[0]
+        week_end_day = days[-1]
+
+        time_off_items = (
+            db.query(TimeOff)
+            .filter(TimeOff.start_date <= week_end_day,
+                    TimeOff.end_date >= week_start_day)
+            .all()
+        )
+
+        unavailable = set()
+        for t in time_off_items:
+            cur = t.start_date
+            while cur <= t.end_date:
+                if week_start_day <= cur <= week_end_day:
+                    unavailable.add((t.staff_id, cur))
+                cur += timedelta(days=1)
+
+        conflicts = set()
+        for (day, shift_type_id), e in entry_map.items():
+            if e and e.staff_id and (e.staff_id, day) in unavailable:
+                conflicts.add((day, shift_type_id))
 
         return request.app.state.templates.TemplateResponse(
             "rota_week.html",
@@ -56,11 +90,16 @@ def rota_week(request: Request, week: str | None = Query(default=None)):
                 "shift_types": shift_types,
                 "staff": staff,
                 "entry_map": entry_map,
+
                 # ALPHA 1.1 additions
                 "unavailable": unavailable,
                 "conflicts": conflicts,
             },
         )
+
+    finally:
+        db.close()
+
         
         # Time off overlaps for the visible week
 week_start = days[0]
