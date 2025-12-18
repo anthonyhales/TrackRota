@@ -59,12 +59,14 @@ def rota_week(request: Request, week: str | None = Query(default=None)):
 
         time_off_items = (
             db.query(TimeOff)
-            .filter(TimeOff.start_date <= week_end_day,
-                    TimeOff.end_date >= week_start_day)
+            .filter(
+                TimeOff.start_date <= week_end_day,
+                TimeOff.end_date >= week_start_day,
+            )
             .all()
         )
 
-        unavailable = set()
+        unavailable: set[tuple[int, date]] = set()
         for t in time_off_items:
             cur = t.start_date
             while cur <= t.end_date:
@@ -72,7 +74,7 @@ def rota_week(request: Request, week: str | None = Query(default=None)):
                     unavailable.add((t.staff_id, cur))
                 cur += timedelta(days=1)
 
-        conflicts = set()
+        conflicts: set[tuple[date, int]] = set()
         for (day, shift_type_id), e in entry_map.items():
             if e and e.staff_id and (e.staff_id, day) in unavailable:
                 conflicts.add((day, shift_type_id))
@@ -90,8 +92,6 @@ def rota_week(request: Request, week: str | None = Query(default=None)):
                 "shift_types": shift_types,
                 "staff": staff,
                 "entry_map": entry_map,
-
-                # ALPHA 1.1 additions
                 "unavailable": unavailable,
                 "conflicts": conflicts,
             },
@@ -100,7 +100,6 @@ def rota_week(request: Request, week: str | None = Query(default=None)):
     finally:
         db.close()
 
-        
         # Time off overlaps for the visible week
 week_start = days[0]
 week_end = days[-1]
