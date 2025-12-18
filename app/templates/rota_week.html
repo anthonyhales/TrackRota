@@ -2,10 +2,17 @@
 {% block content %}
 <div class="d-flex align-items-center justify-content-between mb-3">
   <h1 class="h3 text-gray-800 mb-0">Rota (week starting {{ week_start.isoformat() }})</h1>
-  <div>
-    <a class="btn btn-sm btn-outline-secondary" href="/rota?week={{ prev_week }}"><i class="fas fa-chevron-left"></i> Prev</a>
-    <a class="btn btn-sm btn-outline-secondary" href="/rota?week={{ next_week }}">Next <i class="fas fa-chevron-right"></i></a>
-  </div>
+<div>
+  <a class="btn btn-sm btn-outline-secondary" href="/rota?week={{ prev_week }}">
+    <i class="fas fa-chevron-left"></i> Prev
+  </a>
+  <a class="btn btn-sm btn-outline-primary mx-1" href="/rota">
+    Today
+  </a>
+  <a class="btn btn-sm btn-outline-secondary" href="/rota?week={{ next_week }}">
+    Next <i class="fas fa-chevron-right"></i>
+  </a>
+</div>
 </div>
 
 <div class="card shadow">
