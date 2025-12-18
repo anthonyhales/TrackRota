@@ -16,7 +16,7 @@ from .routers.rota import router as rota_router
 from .routers.users import router as users_router
 from .routers.settings import router as settings_router
 from .routers.time_off import router as time_off_router
-
+from .version import APP_VERSION
 
 app = FastAPI(title="On Call Tracker - ALPHA 1")
 
@@ -59,6 +59,12 @@ def on_startup():
         bootstrap_defaults(db)
     finally:
         db.close()
+
+@app.middleware("http")
+async def add_version_to_request(request: Request, call_next):
+    request.state.app_version = APP_VERSION
+    response = await call_next(request)
+    return response
 
 # Routers
 app.include_router(auth_router)
