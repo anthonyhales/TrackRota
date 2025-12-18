@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 import os
 app = FastAPI()
 from .db import engine, SessionLocal
-from .models import Base, User, ShiftType
+from .models import Base, User, Staff, ShiftType, RotaEntry, TimeOff, Rota
 from .security import hash_password
 
 from .routers.auth_routes import router as auth_router
@@ -54,14 +54,22 @@ app.state.templates = templates
 def bootstrap_defaults(db: Session):
     # Create tables
     Base.metadata.create_all(bind=engine)
-
+    
+# Ensure we have at least one rota
+if db.query(Rota).count() == 0:
+    default_rota = Rota(name="Primary On Call", description="Default rota")
+    db.add(default_rota)
+    db.commit()
+    
     # Default shift types if missing
-    if db.query(ShiftType).count() == 0:
-        db.add_all([
-            ShiftType(name="Primary", description="Primary on-call"),
-            ShiftType(name="Secondary", description="Secondary on-call"),
-        ])
-        db.commit()
+    default_rota = db.query(Rota).filter(Rota.active == True).order_by(Rota.id.asc()).first()
+
+if default_rota and db.query(ShiftType).count() == 0:
+    db.add_all([
+        ShiftType(rota_id=default_rota.id, name="Primary", description="Primary on call"),
+        ShiftType(rota_id=default_rota.id, name="Secondary", description="Secondary on call"),
+    ])
+    db.commit()
 
     # Bootstrap admin if env vars provided and no admin exists
     admin_email = os.getenv("APP_BOOTSTRAP_ADMIN_EMAIL")
