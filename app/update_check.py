@@ -1,13 +1,12 @@
 import requests
-from functools import lru_cache
+import re
 
 GITHUB_REPO = "anthonyhales/TrackRota"
 
-@lru_cache(maxsize=1)
 def get_latest_release():
     try:
         r = requests.get(
-            f"https://api.github.com/repos/anthonyhales/TrackRota/releases/latest",
+            f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest",
             timeout=5,
         )
         r.raise_for_status()
@@ -16,8 +15,10 @@ def get_latest_release():
             "tag": data["tag_name"].lstrip("v"),
             "url": data["html_url"],
         }
-    except Exception:
+    except Exception as e:
+        print("GitHub update check failed:", e)
         return None
 
 def normalize(v: str) -> tuple[int, ...]:
-    return tuple(int(x) for x in v.split("."))
+    parts = re.findall(r"\d+", v)
+    return tuple(int(p) for p in parts)
