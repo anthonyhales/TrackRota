@@ -86,5 +86,19 @@ class RotaEntry(Base):
         nullable=False,
     )
 
+class TimeOff(Base):
+    __tablename__ = "time_off"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    staff_id: Mapped[int] = mapped_column(ForeignKey("staff.id"), nullable=False, index=True)
+
+    start_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    end_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+
+    reason: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+
+    staff = relationship("Staff")
+
     shift_type = relationship("ShiftType", back_populates="rota_entries")
     staff = relationship("Staff", back_populates="rota_entries")

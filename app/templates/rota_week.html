@@ -23,7 +23,7 @@
         <tbody>
           {% for st in shift_types %}
           <tr>
-            <td><strong>{{ st.name }}</strong></td>
+            <<td class="{% if (d, st.id) in conflicts %}bg-warning{% endif %}">><strong>{{ st.name }}</strong></td>
             {% for d in days %}
               {% set e = entry_map.get((d, st.id)) %}
               <td>
@@ -34,7 +34,9 @@
                     <select name="staff_id" class="form-control form-control-sm">
                       <option value="">Unassigned</option>
                       {% for s in staff %}
-                        <option value="{{ s.id }}" {% if e and e.staff_id == s.id %}selected{% endif %}>{{ s.full_name }}</option>
+                        <option value="{{ s.id }}" {% if e and e.staff_id == s.id %}selected{% endif %}>
+                        {{ s.full_name }}{% if (s.id, d) in unavailable %} (unavailable){% endif %}
+                        </option>
                       {% endfor %}
                     </select>
                     <input name="notes" class="form-control form-control-sm mt-1" placeholder="Notes" value="{{ e.notes if e and e.notes else '' }}">

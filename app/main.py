@@ -15,6 +15,8 @@ from .routers.shift_types import router as shift_types_router
 from .routers.rota import router as rota_router
 from .routers.users import router as users_router
 from .routers.settings import router as settings_router
+from .routers.time_off import router as time_off_router
+
 
 app = FastAPI(title="On Call Tracker - ALPHA 1")
 
@@ -66,3 +68,4 @@ app.include_router(shift_types_router)
 app.include_router(rota_router)
 app.include_router(users_router)
 app.include_router(settings_router)
+app.include_router(time_off_router)
