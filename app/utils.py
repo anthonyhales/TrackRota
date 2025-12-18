@@ -17,3 +17,6 @@ def start_of_week(d: date) -> date:
 def week_dates(d: date) -> list[date]:
     start = start_of_week(d)
     return [start + timedelta(days=i) for i in range(7)]
+
+def is_favourite(user, rota_id: int) -> bool:
+    return rota_id in (user.favourite_rotas or [])
