@@ -7,6 +7,7 @@ from ..models import Staff
 
 router = APIRouter(prefix="/staff", tags=["staff"])
 
+
 @router.get("")
 def list_staff(request: Request):
     db: Session = SessionLocal()
@@ -17,10 +18,18 @@ def list_staff(request: Request):
         if not require_role(user, {"Admin", "Manager"}):
             return RedirectResponse("/", status_code=303)
 
-        staff = db.query(Staff).order_by(Staff.active.desc(), Staff.full_name.asc()).all()
-        return request.app.state.templates.TemplateResponse("staff_list.html", {"request": request, "user": user, "staff": staff})
+        staff = (
+            db.query(Staff)
+            .order_by(Staff.active.desc(), Staff.full_name.asc())
+            .all()
+        )
+        return request.app.state.templates.TemplateResponse(
+            "staff_list.html",
+            {"request": request, "user": user, "staff": staff},
+        )
     finally:
         db.close()
+
 
 @router.get("/new")
 def new_staff_form(request: Request):
@@ -31,19 +40,26 @@ def new_staff_form(request: Request):
             return RedirectResponse("/login", status_code=303)
         if not require_role(user, {"Admin", "Manager"}):
             return RedirectResponse("/", status_code=303)
-        return request.app.state.templates.TemplateResponse("staff_form.html", {"request": request, "user": user, "staff_member": None})
+
+        return request.app.state.templates.TemplateResponse(
+            "staff_form.html",
+            {"request": request, "user": user, "staff_member": None},
+        )
     finally:
         db.close()
 
+
 @router.post("/new")
-def create_staff(request: Request,
-                 full_name: str = Form(...),
-                 email: str = Form(""),
-                 phone: str = Form(""),
-                 team: str = Form(""),
-                 extension: str = Form(""),
-                 bleep: str = Form(""),
-                 active: str = Form("on")):
+def create_staff(
+    request: Request,
+    full_name: str = Form(...),
+    email: str = Form(""),
+    phone: str = Form(""),
+    team: str = Form(""),
+    extension: str = Form(""),
+    bleep: str = Form(""),
+    active: str = Form("on"),
+):
     db: Session = SessionLocal()
     try:
         user = get_current_user(request, db)
@@ -58,7 +74,7 @@ def create_staff(request: Request,
             phone=phone.strip() or None,
             team=team.strip() or None,
             extension=extension.strip() or None,
-            bleep+bleep.strip() or None,
+            bleep=bleep.strip() or None,
             active=(active == "on"),
         )
         db.add(s)
@@ -66,6 +82,7 @@ def create_staff(request: Request,
         return RedirectResponse("/staff", status_code=303)
     finally:
         db.close()
+
 
 @router.get("/{staff_id}")
 def edit_staff_form(request: Request, staff_id: int):
@@ -81,18 +98,26 @@ def edit_staff_form(request: Request, staff_id: int):
         if not s:
             return RedirectResponse("/staff", status_code=303)
 
-        return request.app.state.templates.TemplateResponse("staff_form.html", {"request": request, "user": user, "staff_member": s})
+        return request.app.state.templates.TemplateResponse(
+            "staff_form.html",
+            {"request": request, "user": user, "staff_member": s},
+        )
     finally:
         db.close()
 
+
 @router.post("/{staff_id}")
-def update_staff(request: Request,
-                 staff_id: int,
-                 full_name: str = Form(...),
-                 email: str = Form(""),
-                 phone: str = Form(""),
-                 team: str = Form(""),
-                 active: str = Form(None)):
+def update_staff(
+    request: Request,
+    staff_id: int,
+    full_name: str = Form(...),
+    email: str = Form(""),
+    phone: str = Form(""),
+    team: str = Form(""),
+    extension: str = Form(""),
+    bleep: str = Form(""),
+    active: str = Form(None),
+):
     db: Session = SessionLocal()
     try:
         user = get_current_user(request, db)
@@ -109,7 +134,10 @@ def update_staff(request: Request,
         s.email = email.strip() or None
         s.phone = phone.strip() or None
         s.team = team.strip() or None
+        s.extension = extension.strip() or None
+        s.bleep = bleep.strip() or None
         s.active = (active == "on")
+
         db.commit()
         return RedirectResponse("/staff", status_code=303)
     finally:
