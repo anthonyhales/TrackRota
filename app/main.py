@@ -21,7 +21,15 @@ from .version import APP_VERSION
 from .update_check import get_latest_release
 
 def normalize(v: str) -> tuple[int, ...]:
-    return tuple(int(x) for x in v.split("."))
+    """
+    Converts versions like:
+    v1.2.3
+    1.2.3-alpha
+    1.2.X
+    into a comparable tuple (1, 2, 3)
+    """
+    parts = re.findall(r"\d+", v)
+    return tuple(int(p) for p in parts)
     
 @app.on_event("startup")
 def check_for_updates():
