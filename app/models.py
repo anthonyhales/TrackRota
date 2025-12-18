@@ -53,33 +53,49 @@ class User(Base):
 
     staff = relationship("Staff", back_populates="user")
 
-
-class ShiftType(Base):
-    __tablename__ = "shift_types"
+class Rota(Base):
+    __tablename__ = "rotas"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     description: Mapped[str | None] = mapped_column(String(255), nullable=True)
     active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, nullable=False
+    )
 
+    shift_types = relationship("ShiftType", back_populates="rota")
+
+class ShiftType(Base):
+    __tablename__ = "shift_types"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    rota_id: Mapped[int] = mapped_column(ForeignKey("rotas.id"), nullable=False)
+
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    description: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+
+    rota = relationship("Rota", back_populates="shift_types")
     rota_entries = relationship("RotaEntry", back_populates="shift_type")
+
+    __table_args__ = (
+        UniqueConstraint("rota_id", "name", name="uq_shift_name_per_rota"),
+    )
 
 
 class RotaEntry(Base):
     __tablename__ = "rota_entries"
     __table_args__ = (
-        UniqueConstraint("shift_date", "shift_type_id", name="uq_rota_date_shift_type"),
+        UniqueConstraint("rota_id", "shift_date", "shift_type_id", name="uq_rota_date_shift_type"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    shift_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    rota_id: Mapped[int] = mapped_column(ForeignKey("rotas.id"), nullable=False, index=True)
 
-    shift_type_id: Mapped[int] = mapped_column(
-        ForeignKey("shift_types.id"), nullable=False
-    )
-    staff_id: Mapped[int | None] = mapped_column(
-        ForeignKey("staff.id"), nullable=True
-    )
+    shift_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    shift_type_id: Mapped[int] = mapped_column(ForeignKey("shift_types.id"), nullable=False)
+    staff_id: Mapped[int | None] = mapped_column(ForeignKey("staff.id"), nullable=True)
 
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     updated_at: Mapped[datetime] = mapped_column(
@@ -89,6 +105,7 @@ class RotaEntry(Base):
         nullable=False,
     )
 
+    rota = relationship("Rota")
     shift_type = relationship("ShiftType", back_populates="rota_entries")
     staff = relationship("Staff", back_populates="rota_entries")
 
