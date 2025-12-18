@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 import os
-
+app = FastAPI()
 from .db import engine, SessionLocal
 from .models import Base, User, ShiftType
 from .security import hash_password
