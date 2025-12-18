@@ -41,6 +41,8 @@ def create_staff(request: Request,
                  email: str = Form(""),
                  phone: str = Form(""),
                  team: str = Form(""),
+                 extension: str = Form(""),
+                 bleep: str = Form(""),
                  active: str = Form("on")):
     db: Session = SessionLocal()
     try:
@@ -55,6 +57,8 @@ def create_staff(request: Request,
             email=email.strip() or None,
             phone=phone.strip() or None,
             team=team.strip() or None,
+            extension=extension.strip() or None,
+            bleep+bleep.strip() or None,
             active=(active == "on"),
         )
         db.add(s)
