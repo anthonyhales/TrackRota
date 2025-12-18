@@ -1,13 +1,23 @@
-from fastapi import FastAPI
-from fastapi import Request
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 import os
-app = FastAPI()
+import re
+
 from .db import engine, SessionLocal
-from .models import Base, User, Staff, ShiftType, RotaEntry, TimeOff, Rota
+from .models import (
+    Base,
+    User,
+    Staff,
+    ShiftType,
+    RotaEntry,
+    TimeOff,
+    Rota,
+)
 from .security import hash_password
+from .version import APP_VERSION
+from .update_check import get_latest_release
 
 from .routers.auth_routes import router as auth_router
 from .routers.dashboard import router as dashboard_router
@@ -17,10 +27,29 @@ from .routers.rota import router as rota_router
 from .routers.users import router as users_router
 from .routers.settings import router as settings_router
 from .routers.time_off import router as time_off_router
-from .version import APP_VERSION
-from .update_check import get_latest_release
 
-import re
+
+# -------------------------------------------------
+# App
+# -------------------------------------------------
+
+app = FastAPI()
+
+
+# -------------------------------------------------
+# Templates & static
+# -------------------------------------------------
+
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
+templates = Jinja2Templates(directory="app/templates")
+app.state.templates = templates
+
+
+# -------------------------------------------------
+# Version helpers
+# -------------------------------------------------
+
 def normalize(v: str) -> tuple[int, ...]:
     """
     Converts versions like:
@@ -31,59 +60,70 @@ def normalize(v: str) -> tuple[int, ...]:
     """
     parts = re.findall(r"\d+", v)
     return tuple(int(p) for p in parts)
-    
-@app.on_event("startup")
-def check_for_updates():
-    release = get_latest_release()
-    if release:
-        latest = normalize(release["tag"])
-        current = normalize(APP_VERSION)
 
-        app.state.latest_version = release
-        app.state.update_available = latest > current
-    else:
-        app.state.latest_version = None
-        app.state.update_available = False
 
-# Static
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
-
-templates = Jinja2Templates(directory="app/templates")
-app.state.templates = templates
+# -------------------------------------------------
+# Bootstrap data
+# -------------------------------------------------
 
 def bootstrap_defaults(db: Session):
     # Create tables
     Base.metadata.create_all(bind=engine)
-    
-# Ensure we have at least one rota
-if db.query(Rota).count() == 0:
-    default_rota = Rota(name="Primary On Call", description="Default rota")
-    db.add(default_rota)
-    db.commit()
-    
-    # Default shift types if missing
-    default_rota = db.query(Rota).filter(Rota.active == True).order_by(Rota.id.asc()).first()
 
-if default_rota and db.query(ShiftType).count() == 0:
-    db.add_all([
-        ShiftType(rota_id=default_rota.id, name="Primary", description="Primary on call"),
-        ShiftType(rota_id=default_rota.id, name="Secondary", description="Secondary on call"),
-    ])
-    db.commit()
+    # Ensure at least one rota exists
+    rota = db.query(Rota).order_by(Rota.id.asc()).first()
+    if not rota:
+        rota = Rota(
+            name="Primary On Call",
+            description="Default rota",
+            active=True,
+        )
+        db.add(rota)
+        db.commit()
+        db.refresh(rota)
 
-    # Bootstrap admin if env vars provided and no admin exists
+    # Default shift types if none exist
+    if db.query(ShiftType).count() == 0:
+        db.add_all(
+            [
+                ShiftType(
+                    rota_id=rota.id,
+                    name="Primary",
+                    description="Primary on call",
+                    active=True,
+                ),
+                ShiftType(
+                    rota_id=rota.id,
+                    name="Secondary",
+                    description="Secondary on call",
+                    active=True,
+                ),
+            ]
+        )
+        db.commit()
+
+    # Optional admin bootstrap
     admin_email = os.getenv("APP_BOOTSTRAP_ADMIN_EMAIL")
     admin_password = os.getenv("APP_BOOTSTRAP_ADMIN_PASSWORD")
+
     if admin_email and admin_password:
-        existing = db.query(User).filter(User.email == admin_email.lower().strip()).first()
+        admin_email = admin_email.lower().strip()
+        existing = db.query(User).filter(User.email == admin_email).first()
         if not existing:
-            db.add(User(
-                email=admin_email.lower().strip(),
-                password_hash=hash_password(admin_password),
-                role="Admin",
-                active=True,
-            ))
+            db.add(
+                User(
+                    email=admin_email,
+                    password_hash=hash_password(admin_password),
+                    role="Admin",
+                    active=True,
+                )
+            )
             db.commit()
+
+
+# -------------------------------------------------
+# Startup events
+# -------------------------------------------------
 
 @app.on_event("startup")
 def on_startup():
@@ -93,13 +133,35 @@ def on_startup():
     finally:
         db.close()
 
+
+@app.on_event("startup")
+def check_for_updates():
+    release = get_latest_release()
+    if release:
+        latest = normalize(release["tag"])
+        current = normalize(APP_VERSION)
+        app.state.latest_version = release
+        app.state.update_available = latest > current
+    else:
+        app.state.latest_version = None
+        app.state.update_available = False
+
+
+# -------------------------------------------------
+# Middleware
+# -------------------------------------------------
+
 @app.middleware("http")
 async def add_version_to_request(request: Request, call_next):
     request.state.app_version = APP_VERSION
     response = await call_next(request)
     return response
 
+
+# -------------------------------------------------
 # Routers
+# -------------------------------------------------
+
 app.include_router(auth_router)
 app.include_router(dashboard_router)
 app.include_router(staff_router)
