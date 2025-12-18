@@ -20,6 +20,9 @@ from .routers.time_off import router as time_off_router
 from .version import APP_VERSION
 from .update_check import get_latest_release
 
+def normalize(v: str) -> tuple[int, ...]:
+    return tuple(int(x) for x in v.split("."))
+    
 @app.on_event("startup")
 def check_for_updates():
     release = get_latest_release()
