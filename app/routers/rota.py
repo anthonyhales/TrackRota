@@ -124,7 +124,6 @@ conflicts = set()
 for (d, st_id), e in entry_map.items():
     if e and e.staff_id and (e.staff_id, d) in unavailable:
         conflicts.add((d, st_id))
-
     finally:
         db.close()
 
