@@ -1,11 +1,10 @@
-from datetime import timedelta
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from ..db import SessionLocal
 from ..auth import get_current_user
-from ..models import Rota, ShiftType, RotaEntry, Staff
+from ..models import Rota
 from ..utils import now_local
 
 router = APIRouter()
@@ -18,9 +17,7 @@ def dashboard(request: Request):
         if not user:
             return RedirectResponse("/login", status_code=303)
 
-        today = now_local().date()
-        next_7 = [today + timedelta(days=i) for i in range(7)]
-
+        # Load all active rotas
         rotas = (
             db.query(Rota)
             .filter(Rota.active == True)
@@ -28,58 +25,25 @@ def dashboard(request: Request):
             .all()
         )
 
-        dashboard_rotas = []
-
         favourite_ids = user.favourite_rotas or []
 
+        favourite_rotas = []
+        other_rotas = []
+
         for rota in rotas:
-            shift_types = (
-                db.query(ShiftType)
-                .filter(
-                    ShiftType.active == True,
-                    ShiftType.rota_id == rota.id,
-                )
-                .order_by(ShiftType.name.asc())
-                .all()
-            )
-
-            entries = (
-                db.query(RotaEntry)
-                .filter(
-                    RotaEntry.rota_id == rota.id,
-                    RotaEntry.shift_date.in_(next_7),
-                )
-                .all()
-            )
-
-            entry_map = {(e.shift_date, e.shift_type_id): e for e in entries}
-
-            today_items = []
-            for st in shift_types:
-                e = entry_map.get((today, st.id))
-                staff = None
-                if e and e.staff_id:
-                    staff = db.query(Staff).filter(Staff.id == e.staff_id).first()
-
-                today_items.append({
-                    "shift_type": st,
-                    "entry": e,
-                    "staff": staff,
-                })
-
-            dashboard_rotas.append({
-                "rota": rota,
-                "is_favourite": rota.id in favourite_ids,
-                "today_items": today_items,
-            })
+            if rota.id in favourite_ids:
+                favourite_rotas.append(rota)
+            else:
+                other_rotas.append(rota)
 
         return request.app.state.templates.TemplateResponse(
             "dashboard.html",
             {
                 "request": request,
                 "user": user,
-                "dashboard_rotas": dashboard_rotas,
-                "today": today,
+                "today": now_local().date(),
+                "favourite_rotas": favourite_rotas,
+                "other_rotas": other_rotas,
             },
         )
 
