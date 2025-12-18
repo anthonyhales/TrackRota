@@ -72,7 +72,14 @@
         <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
           <i class="fa fa-bars"></i>
         </button>
-
+{% if request.app.state.update_available %}
+<div class="alert alert-info text-center mb-0">
+  A newer version ({{ request.app.state.latest_version.tag }}) is available.
+  <a href="{{ request.app.state.latest_version.url }}" target="_blank">
+    View release notes
+  </a>
+</div>
+{% endif %}
         <ul class="navbar-nav ml-auto">
           {% if user %}
           <li class="nav-item dropdown no-arrow">
