@@ -22,9 +22,14 @@
         <thead>
           <tr>
             <th style="min-width: 140px;">Shift</th>
-            {% for d in days %}
-              <th>{{ d.strftime("%a") }}<br><span class="small text-muted">{{ d.isoformat() }}</span></th>
-            {% endfor %}
+        {% for d in days %}
+  <th class="{% if d == today %}bg-success text-white{% endif %}">
+    {{ d.strftime("%a") }}<br>
+    <span class="small {% if d == today %}text-white{% else %}text-muted{% endif %}">
+      {{ d.isoformat() }}
+    </span>
+  </th>
+{% endfor %}
           </tr>
         </thead>
         <tbody>
