@@ -4,6 +4,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 import os
 import re
+from .db_migrations import ensure_column_exists
 
 from .db import engine, SessionLocal
 from .models import (
@@ -68,33 +69,46 @@ def normalize(v: str) -> tuple[int, ...]:
 # -------------------------------------------------
 
 def bootstrap_defaults(db: Session):
-    # Create tables
+    # Create tables first
     Base.metadata.create_all(bind=engine)
 
+    # ---- lightweight migrations ----
+    ensure_column_exists(
+        db,
+        table="users",
+        column="favourite_rotas",
+        column_sql="TEXT",
+    )
+
     # Ensure at least one rota exists
-    rota = db.query(Rota).order_by(Rota.id.asc()).first()
-    if not rota:
-        rota = Rota(
+    if db.query(Rota).count() == 0:
+        default_rota = Rota(
             name="Primary On Call",
             description="Default rota",
             active=True,
         )
-        db.add(rota)
+        db.add(default_rota)
         db.commit()
-        db.refresh(rota)
 
-    # Default shift types if none exist
-    if db.query(ShiftType).count() == 0:
+    default_rota = (
+        db.query(Rota)
+        .filter(Rota.active == True)
+        .order_by(Rota.id.asc())
+        .first()
+    )
+
+    # Default shift types
+    if default_rota and db.query(ShiftType).count() == 0:
         db.add_all(
             [
                 ShiftType(
-                    rota_id=rota.id,
+                    rota_id=default_rota.id,
                     name="Primary",
                     description="Primary on call",
                     active=True,
                 ),
                 ShiftType(
-                    rota_id=rota.id,
+                    rota_id=default_rota.id,
                     name="Secondary",
                     description="Secondary on call",
                     active=True,
@@ -103,17 +117,20 @@ def bootstrap_defaults(db: Session):
         )
         db.commit()
 
-    # Optional admin bootstrap
+    # Bootstrap admin user (optional)
     admin_email = os.getenv("APP_BOOTSTRAP_ADMIN_EMAIL")
     admin_password = os.getenv("APP_BOOTSTRAP_ADMIN_PASSWORD")
 
     if admin_email and admin_password:
-        admin_email = admin_email.lower().strip()
-        existing = db.query(User).filter(User.email == admin_email).first()
+        existing = (
+            db.query(User)
+            .filter(User.email == admin_email.lower().strip())
+            .first()
+        )
         if not existing:
             db.add(
                 User(
-                    email=admin_email,
+                    email=admin_email.lower().strip(),
                     password_hash=hash_password(admin_password),
                     role="Admin",
                     active=True,
