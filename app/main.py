@@ -27,6 +27,7 @@ from .routers.rota import router as rota_router
 from .routers.users import router as users_router
 from .routers.settings import router as settings_router
 from .routers.time_off import router as time_off_router
+from .routers.rotas import router as rotas_router
 
 
 # -------------------------------------------------
@@ -170,3 +171,4 @@ app.include_router(rota_router)
 app.include_router(users_router)
 app.include_router(settings_router)
 app.include_router(time_off_router)
+app.include_router(rotas_router)
