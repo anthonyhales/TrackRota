@@ -67,6 +67,7 @@
             {% for d in days %}
               {% set e = entry_map.get((d, st.id)) %}
               <td class="{% if (d, st.id) in conflicts %}bg-warning{% endif %}">
+
                 {% if can_edit %}
                   <form method="post" action="/rota/assign" class="rota-cell-form">
                     <input type="hidden" name="rota_id" value="{{ current_rota.id }}">
@@ -84,6 +85,18 @@
                       {% endfor %}
                     </select>
 
+                    {% if e and e.staff_id %}
+                      {% for s in staff %}
+                        {% if s.id == e.staff_id %}
+                          <div class="small text-muted mt-1">
+                            {% if s.phone %}📞 {{ s.phone }}{% endif %}
+                            {% if s.extension %} · Ext {{ s.extension }}{% endif %}
+                            {% if s.bleep %} · 📟 {{ s.bleep }}{% endif %}
+                          </div>
+                        {% endif %}
+                      {% endfor %}
+                    {% endif %}
+
                     <input name="notes"
                            class="form-control form-control-sm mt-1"
                            placeholder="Notes"
@@ -93,22 +106,37 @@
                       Save
                     </button>
                   </form>
+
                 {% else %}
                   <div>
                     {% if e and e.staff_id %}
                       {% for s in staff %}
                         {% if s.id == e.staff_id %}
                           <strong>{{ s.full_name }}</strong>
+
+                          {% if s.phone %}
+                            <div class="small text-muted">📞 {{ s.phone }}</div>
+                          {% endif %}
+
+                          {% if s.extension %}
+                            <div class="small text-muted">Ext {{ s.extension }}</div>
+                          {% endif %}
+
+                          {% if s.bleep %}
+                            <div class="small text-muted">📟 {{ s.bleep }}</div>
+                          {% endif %}
                         {% endif %}
                       {% endfor %}
                     {% else %}
                       <span class="text-muted">—</span>
                     {% endif %}
+
                     {% if e and e.notes %}
                       <div class="small text-muted">{{ e.notes }}</div>
                     {% endif %}
                   </div>
                 {% endif %}
+
               </td>
             {% endfor %}
           </tr>
