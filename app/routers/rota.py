@@ -100,33 +100,6 @@ def rota_week(request: Request, week: str | None = Query(default=None)):
     finally:
         db.close()
 
-        # Time off overlaps for the visible week
-week_start = days[0]
-week_end = days[-1]
-
-time_off_items = (
-    db.query(TimeOff)
-    .filter(TimeOff.start_date <= week_end, TimeOff.end_date >= week_start)
-    .all()
-)
-
-# Build quick lookup: (staff_id, date) -> True
-unavailable = set()
-for t in time_off_items:
-    dcur = t.start_date
-    while dcur <= t.end_date:
-        if week_start <= dcur <= week_end:
-            unavailable.add((t.staff_id, dcur))
-        dcur = dcur + timedelta(days=1)
-
-# Conflicts: assigned + unavailable
-conflicts = set()
-for (d, st_id), e in entry_map.items():
-    if e and e.staff_id and (e.staff_id, d) in unavailable:
-        conflicts.add((d, st_id))
-    finally:
-        db.close()
-
 @router.post("/assign")
 def assign(request: Request,
            shift_date: str = Form(...),
