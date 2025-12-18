@@ -24,12 +24,14 @@ from .update_check import get_latest_release
 def check_for_updates():
     release = get_latest_release()
     if release:
+        latest = normalize(release["tag"])
+        current = normalize(APP_VERSION)
+
         app.state.latest_version = release
-        app.state.update_available = release["tag"] != APP_VERSION
+        app.state.update_available = latest > current
     else:
         app.state.latest_version = None
         app.state.update_available = False
-app = FastAPI(title="On Call Tracker - ALPHA 1")
 
 # Static
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
