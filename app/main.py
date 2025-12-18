@@ -20,6 +20,7 @@ from .routers.time_off import router as time_off_router
 from .version import APP_VERSION
 from .update_check import get_latest_release
 
+import re
 def normalize(v: str) -> tuple[int, ...]:
     """
     Converts versions like:
