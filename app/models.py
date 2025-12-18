@@ -12,6 +12,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .db import Base
+from sqlalchemy import JSON
 
 
 class Staff(Base):
@@ -54,6 +55,7 @@ class User(Base):
     )
 
     staff = relationship("Staff", back_populates="user")
+    favourite_rotas = mapped_column(JSON, nullable=True)  # list of rota IDs
 
 class Rota(Base):
     __tablename__ = "rotas"
