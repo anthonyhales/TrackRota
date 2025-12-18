@@ -34,7 +34,7 @@
         <tbody>
           {% for st in shift_types %}
           <tr>
-            <<td class="{% if (d, st.id) in conflicts %}bg-warning{% endif %}">><strong>{{ st.name }}</strong></td>
+            <td><strong>{{ st.name }}</strong></td>
             {% for d in days %}
               {% set e = entry_map.get((d, st.id)) %}
               <td>
