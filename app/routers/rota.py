@@ -78,7 +78,7 @@ def rota_week(request: Request, week: str | None = Query(default=None)):
         for (day, shift_type_id), e in entry_map.items():
             if e and e.staff_id and (e.staff_id, day) in unavailable:
                 conflicts.add((day, shift_type_id))
-
+                today = now_local().date()
         return request.app.state.templates.TemplateResponse(
             "rota_week.html",
             {
