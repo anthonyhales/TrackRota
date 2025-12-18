@@ -31,6 +31,7 @@ def rota_week(request: Request, week: str | None = Query(default=None)):
             d = now_local().date()
 
         days = week_dates(d)
+        today = now_local().date()
         week_start = start_of_week(d)
         prev_week = (week_start - timedelta(days=7)).isoformat()
         next_week = (week_start + timedelta(days=7)).isoformat()
