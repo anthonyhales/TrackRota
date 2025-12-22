@@ -104,16 +104,6 @@
                     <button class="btn btn-sm btn-outline-primary" type="submit">
                       Save
                     </button>
-                    {% if user.role == "Admin" %}
-                    <form method="post"
-                      action="/shift-types/{{ st.id }}/delete"
-                      style="display:inline"
-                      onsubmit="return confirm('Delete this shift type? This cannot be undone.');">
-                    <button class="btn btn-sm btn-outline-danger">
-                      Delete
-                    </button>
-                    </form>
-                  {% endif %}
                   </td>
                 </form>
               </tr>
