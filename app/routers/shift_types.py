@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from ..db import SessionLocal
 from ..auth import get_current_user, require_role
-from ..models import Rota, ShiftType
+from ..models import Rota, ShiftType, RotaEntry
 
 router = APIRouter(prefix="/shift-types", tags=["shift-types"])
 
@@ -163,8 +163,8 @@ def delete_shift_type(request: Request, shift_type_id: int):
             return RedirectResponse("/shift-types", status_code=303)
 
         # Optional safety: block delete if used in rota
-        in_use = db.query(Rota).filter(
-            Rota.shift_type_id == shift_type_id
+        in_use = db.query(RotaEntry).filter(
+            RotaEntry.shift_type_id == shift_type_id
         ).first()
         if in_use:
             # You could flash a message later; for now just refuse
