@@ -18,6 +18,7 @@ from .models import (
 )
 from .security import hash_password
 from .version import APP_VERSION
+from .version import BUILD_NUMBER
 from .update_check import get_latest_release
 
 from .routers.auth_routes import router as auth_router
@@ -172,6 +173,7 @@ def check_for_updates():
 @app.middleware("http")
 async def add_version_to_request(request: Request, call_next):
     request.state.app_version = APP_VERSION
+    request.state.build_number = BUILD_NUMBER
     response = await call_next(request)
     return response
 
