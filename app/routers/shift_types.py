@@ -140,6 +140,39 @@ def update_shift_type(
             f"/shift-types?rota_id={rota_id}",
             status_code=303,
         )
+    
+    
 
+    finally:
+        db.close()
+
+@router.post("/{shift_type_id}/delete")
+def delete_shift_type(request: Request, shift_type_id: int):
+    db: Session = SessionLocal()
+    try:
+        user = get_current_user(request, db)
+        if not user:
+            return RedirectResponse("/login", status_code=303)
+
+        # 🔒 Admin only
+        if user.role != "Admin":
+            return RedirectResponse("/shift-types", status_code=303)
+
+        st = db.query(ShiftType).filter(ShiftType.id == shift_type_id).first()
+        if not st:
+            return RedirectResponse("/shift-types", status_code=303)
+
+        # Optional safety: block delete if used in rota
+        in_use = db.query(Rota).filter(
+            Rota.shift_type_id == shift_type_id
+        ).first()
+        if in_use:
+            # You could flash a message later; for now just refuse
+            return RedirectResponse("/shift-types", status_code=303)
+
+        db.delete(st)
+        db.commit()
+
+        return RedirectResponse("/shift-types", status_code=303)
     finally:
         db.close()
